@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: rabbitmq-replicaset
+  namespace: nombinome1-nombinome2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3.12-management
+        ports:
+        - containerPort: 5672
+        - containerPort: 15672
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+  namespace: nombinome1-nombinome2
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+  - protocol: TCP
+    port: 5672
+    targetPort: 5672
+  type: ClusterIP
