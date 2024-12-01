@@ -1,0 +1,1 @@
+# Le Dockerfile pour le consommateur est similaire à l'app, mais il doit installer les bibliothèques nécessaires pour interagir avec RabbitMQ et Redis.

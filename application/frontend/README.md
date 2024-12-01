@@ -1,0 +1,1 @@
+# Si notre frontend est une application statique (HTML, CSS, JS), un Dockerfile pour le frontend alors on utilisera un nginx

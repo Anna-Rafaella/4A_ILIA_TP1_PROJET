@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: consumer-replicaset
+  namespace: anna
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      containers:
+        - name: consumer-container
+          image: consumer:latest
+          env:
+            - name: REDIS_HOST
+              value: svc-redis
+            - name: RABBITMQ_HOST
+              value: svc-rabbitmq

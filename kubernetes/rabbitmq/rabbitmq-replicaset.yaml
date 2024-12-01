@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: rabbitmq-replicaset
+  namespace: anna
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - name: rabbitmq-container
+          image: rabbitmq:management
+          ports:
+            - containerPort: 5672
+            - containerPort: 15672
