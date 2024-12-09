@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: consumer-container
-          image: consumer:latest
+          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/consumer-2024:anna
           env:
             - name: REDIS_HOST
               value: svc-redis

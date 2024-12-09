@@ -1,19 +1,55 @@
-version: '3.8'  # Utiliser une version plus récente de Docker Compose
+version: '3.8'  # Version de Docker Compose
 
 services:
+  redis:
+    image: "redis:alpine"
+    networks:
+      - app-network
+    command: ["redis-server", "--bind", "0.0.0.0"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - redis-data:/data
+
+  rabbitmq:
+    image: "rabbitmq:management"
+    ports:
+      - "5672:5672"   # Port RabbitMQ pour les communications
+      - "15672:15672" # Port pour l'interface de gestion RabbitMQ
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
   backend:
     build:
       context: ./backend  # Répertoire contenant le Dockerfile pour le backend
     ports:
-      - "5000:5000"
+      - "5000:5000"  # Mappe le port local 5000 au port du conteneur
     networks:
       - app-network
     depends_on:
-      - rabbitmq
-      - redis
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     image: backend:latest  # Tag de l'image Docker pour le backend
-    volumes:
-      - backend-data:/app  # Volume persistant pour les données de l'application
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - REDIS_HOST=redis
 
   consumer:
     build:
@@ -21,47 +57,28 @@ services:
     networks:
       - app-network
     depends_on:
-      - rabbitmq
-      - redis
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     image: consumer:latest  # Tag de l'image Docker pour le consumer
-    volumes:
-      - consumer-data:/app  # Volume persistant pour les données du consumer
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - REDIS_HOST=redis
 
   frontend:
     build:
       context: ./frontend  # Répertoire contenant le Dockerfile pour le frontend
     ports:
-      - "80:80"
+      - "80:80"  # Mappe le port local 80 au port du conteneur
     networks:
       - app-network
     image: frontend:latest  # Tag de l'image Docker pour le frontend
-    volumes:
-      - frontend-data:/usr/share/nginx/html  # Volume persistant pour les fichiers frontend
-
-  rabbitmq:
-    image: "rabbitmq:management"
-    ports:
-      - "5672:5672"   # Port RabbitMQ
-      - "15672:15672"  # Port pour l'interface de gestion RabbitMQ
-    networks:
-      - app-network
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq  # Volume persistant pour les données RabbitMQ
-
-  redis:
-    image: "redis:alpine"
-    networks:
-      - app-network
-    volumes:
-      - redis-data:/data  # Volume persistant pour les données Redis
 
 networks:
   app-network:
     driver: bridge
 
 volumes:
-  backend-data:
-  consumer-data:
-  frontend-data:
   rabbitmq-data:
   redis-data:

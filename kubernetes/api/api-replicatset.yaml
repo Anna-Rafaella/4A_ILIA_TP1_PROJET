@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api-container
-          image: backend:latest
+          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/backend-2024:anna
           ports:
             - containerPort: 8080
           env:
