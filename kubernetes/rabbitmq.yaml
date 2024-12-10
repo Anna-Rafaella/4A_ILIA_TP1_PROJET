@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
   name: rabbitmq-replicaset
-  namespace: nombinome1-nombinome2
+  namespace: anna
 spec:
   replicas: 1
   selector:
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: rabbitmq
-        image: rabbitmq:3.12-management
+        image: rabbitmq:management
         ports:
         - containerPort: 5672
         - containerPort: 15672
@@ -25,7 +25,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: rabbitmq-service
-  namespace: nombinome1-nombinome2
+  namespace: anna
 spec:
   selector:
     app: rabbitmq

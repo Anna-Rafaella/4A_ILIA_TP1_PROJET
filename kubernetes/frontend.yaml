@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: <votre-image-frontend> # Remplacement par l'image Docker du frontend
+        image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/frontend-2024:anna # Remplacement par l'image Docker du frontend
         ports:
         - containerPort: 80
 

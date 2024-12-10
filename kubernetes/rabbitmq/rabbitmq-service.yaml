@@ -9,4 +9,7 @@ spec:
   ports:
     - protocol: TCP
       port: 5672
-      targetPort: 5672
+      targetPort: 5672  # Port pour la communication des clients RabbitMQ
+    - protocol: TCP
+      port: 15672
+      targetPort: 15672  # Port pour l'interface de gestion (RabbitMQ Management UI)

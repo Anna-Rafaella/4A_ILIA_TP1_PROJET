@@ -16,6 +16,8 @@ spec:
       containers:
         - name: consumer-container
           image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/consumer-2024:anna
+          ports:
+            - containerPort: 8081
           env:
             - name: REDIS_HOST
               value: svc-redis

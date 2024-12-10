@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: <votre-image-backend> # Remplacez par l'image Docker de l'API
+        image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/backend-2024:anna # Remplacez par l'image Docker de l'API
         ports:
         - containerPort: 5000
         env:
