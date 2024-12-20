@@ -13,7 +13,7 @@ document.getElementById('calculForm').addEventListener('submit', function (e) {
     }
 
     // Envoi de la requête POST à l'API
-    fetch('http://localhost:5000/api/calcul', {
+    fetch('http://calculatrice-anna.polytech-dijon.kiowy.net/api/calcul', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ a: parseFloat(a), b: parseFloat(b), operation: operation })
@@ -36,7 +36,8 @@ document.getElementById('calculForm').addEventListener('submit', function (e) {
 
 function checkResult(id) {
     // Fonction pour récupérer le résultat depuis l'API
-    fetch(`http://localhost:5000/api/calcul/${id}`)
+    // fetch(`http://localhost:5000/api/calcul/${id}`)
+       fetch(`http://calculatrice-anna.polytech-dijon.kiowy.net/api/calcul/${id}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`Erreur dans la requête GET : ${response.statusText}`);

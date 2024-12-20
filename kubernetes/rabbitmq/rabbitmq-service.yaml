@@ -7,9 +7,11 @@ spec:
   selector:
     app: rabbitmq
   ports:
-    - protocol: TCP
+    - name: amqp
+      protocol: TCP
       port: 5672
       targetPort: 5672  # Port pour la communication des clients RabbitMQ
-    - protocol: TCP
+    - name: management
+      protocol: TCP
       port: 15672
       targetPort: 15672  # Port pour l'interface de gestion (RabbitMQ Management UI)

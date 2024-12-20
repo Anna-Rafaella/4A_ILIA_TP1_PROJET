@@ -8,7 +8,7 @@ import os
 redis_client = redis.Redis(host='redis', port=6379, db=0)
 
 # Connexion à RabbitMQ
-rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
+rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host='svc-rabbitmq'))
 rabbitmq_channel = rabbitmq_connection.channel()
 rabbitmq_channel.queue_declare(queue='calcul_queue')
 

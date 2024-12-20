@@ -15,9 +15,14 @@ spec:
     spec:
       containers:
         - name: consumer-container
-          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/consumer-2024:anna
+          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/consumer_c-2024:anna
+          imagePullPolicy: Always
           ports:
             - containerPort: 8081
+          resources:
+            requests:
+              cpu: 50m
+              memory: 56Mi 
           env:
             - name: REDIS_HOST
               value: svc-redis

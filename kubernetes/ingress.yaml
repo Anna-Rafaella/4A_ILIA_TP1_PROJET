@@ -3,17 +3,23 @@ kind: Ingress
 metadata:
   name: frontend-ingress
   namespace: anna
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
 spec:
+  ingressClassName: nginx
   rules:
-  - host: calculatrice-anna-polytech-dijon.kiowy.net
+  - host: calculatrice-anna.polytech-dijon.kiowy.net
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: frontend-service
+            name: svc-front
+            port:
+              number: 80
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-api
             port:
               number: 80
