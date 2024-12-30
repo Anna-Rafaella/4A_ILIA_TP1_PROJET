@@ -1,33 +1,32 @@
-# Ce fichier contient le consommateur RabbitMQ, qui écoute les tâches de calcul et enregistre les résultats dans Redis.
 import pika
 import redis
 import json
 import os
 
+# Récupération des variables d'environnement
+rabbitmq_host = os.getenv('RABBITMQ_HOST', 'svc-rabbitmq')
+redis_host = os.getenv('REDIS_HOST', 'svc-redis')
+
 # Connexion à Redis
-redis_client = redis.Redis(host='redis', port=6379, db=0)
+redis_client = redis.Redis(host=redis_host, port=6379, db=0)
 
 # Connexion à RabbitMQ
-rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host='svc-rabbitmq'))
+rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_host))
 rabbitmq_channel = rabbitmq_connection.channel()
 rabbitmq_channel.queue_declare(queue='calcul_queue')
-
-# environment pour Backend  : Ajout des variables RABBITMQ_HOST et REDIS_HOST. 
-rabbitmq_host = os.getenv('RABBITMQ_HOST', 'localhost')
-redis_host = os.getenv('REDIS_HOST', 'localhost')
 
 def effectuer_calcul(ch, method, properties, body):
     """
     Extrait une tâche de RabbitMQ, effectue le calcul,
     et stocke le résultat dans Redis.
     """
-    task = json.loads(body)
-    operation = task["operation"]
-    a = task["a"]
-    b = task["b"]
-    calcul_id = task["id"]
-
     try:
+        task = json.loads(body)
+        operation = task.get("operation")
+        a = task.get("a")
+        b = task.get("b")
+        calcul_id = task.get("id")
+
         if operation == "addition":
             result = a + b
         elif operation == "soustraction":
@@ -43,6 +42,7 @@ def effectuer_calcul(ch, method, properties, body):
 
     # Enregistrer le résultat dans Redis
     redis_client.set(calcul_id, result)
+    print(f"Calcul effectué : {calcul_id} -> {result}")
 
 # Consommation des tâches
 rabbitmq_channel.basic_consume(queue='calcul_queue', on_message_callback=effectuer_calcul, auto_ack=True)

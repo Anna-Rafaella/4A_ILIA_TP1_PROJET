@@ -1,7 +1,6 @@
 version: '3.8'  # Version de Docker Compose
 
 services:
-
   redis:
     image: "redis:alpine"
     networks:
@@ -47,10 +46,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    image: backend:latest  # Tag de l'image Docker pour le backend
     environment:
-      - RABBITMQ_HOST=rabbitmq
-      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq  # Utilisation du nom du service comme nom d'hôte
+      - REDIS_HOST=redis        # Utilisation du nom du service comme nom d'hôte
 
   consumer:
     build:
@@ -62,10 +60,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    image: consumer:latest  # Tag de l'image Docker pour le consumer
     environment:
-      - RABBITMQ_HOST=rabbitmq
-      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq  # Utilisation du nom du service comme nom d'hôte
+      - REDIS_HOST=redis        # Utilisation du nom du service comme nom d'hôte
 
   frontend:
     build:
@@ -74,7 +71,6 @@ services:
       - "80:80"  # Mappe le port local 80 au port du conteneur
     networks:
       - app-network
-    image: frontend:latest  # Tag de l'image Docker pour le frontend
 
 networks:
   app-network:

@@ -1,3 +1,39 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high-priority
+value: 1000
+globalDefault: false
+description: "High priority for front-replicaset"
+
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: front-replicaset
+  namespace: anna
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: front
+  template:
+    metadata:
+      labels:
+        app: front
+    spec:
+      priorityClassName: high-priority
+      containers:
+        - name: front-container
+          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/frontend_fr-2024:anna
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 56Mi
+
+
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:

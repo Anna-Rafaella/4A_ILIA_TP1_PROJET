@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Connexion à Redis
-redis_host = os.getenv('REDIS_HOST', 'localhost')  # Utiliser la variable d'environnement pour Redis
+redis_host = os.getenv('REDIS_HOST', 'svc-redis')  # Utiliser la variable d'environnement pour Redis
 try:
     redis_client = redis.Redis(host=redis_host, port=6379, db=0)
     redis_client.ping()  # Vérifier si Redis est accessible
@@ -22,7 +22,7 @@ except redis.exceptions.ConnectionError:
     redis_client = None
 
 # Connexion à RabbitMQ
-rabbitmq_host = os.getenv('RABBITMQ_HOST', 'rabbitmq')  # Utiliser la variable d'environnement pour RabbitMQ
+rabbitmq_host = os.getenv('RABBITMQ_HOST', 'svc-rabbitmq')  # Utiliser la variable d'environnement pour RabbitMQ
 try:
     rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_host))
     rabbitmq_channel = rabbitmq_connection.channel()
