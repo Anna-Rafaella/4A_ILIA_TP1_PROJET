@@ -1,14 +1,11 @@
-Bien sûr ! Voici une proposition de **README.md** bien structuré et attrayant pour votre projet d'application Cloud Native **Calculatrice**. Ce fichier inclut une présentation claire, les étapes réalisées, ainsi que des détails techniques pertinents pour impressionner votre professeur.
 
----
-
-# 🧮 **Calculatrice Cloud Native**
+# 🧮 Calculatrice Cloud Native
 
 Bienvenue dans le projet **Calculatrice Cloud Native** ! Ce projet met en œuvre une application distribuée permettant d'effectuer des calculs via une architecture Cloud Native, intégrant des concepts modernes comme les microservices, la conteneurisation et l'orchestration avec Kubernetes.
 
 ---
 
-## 🌟 **Objectifs du projet**
+## 🌟 Objectifs du projet
 
 - Développer une **application Cloud Native** utilisant des technologies modernes.
 - Illustrer les principes de **microservices** avec un frontend, un backend, une base de données Redis et un gestionnaire de messages RabbitMQ.
@@ -17,30 +14,30 @@ Bienvenue dans le projet **Calculatrice Cloud Native** ! Ce projet met en œuvre
 
 ---
 
-## 📑 **Architecture de l'application**
+## 📑 Architecture de l'application
 
 L'application est composée des composants suivants :
 
-1. **Frontend** :
+1. Frontend :
    - Une interface utilisateur simple en HTML, CSS et JavaScript.
    - Permet de soumettre des calculs (addition, soustraction, etc.) et d'afficher les résultats.
 
-2. **Backend** :
+2. Backend :
    - Une API REST développée en Python avec Flask.
    - Connectée à Redis pour stocker temporairement les résultats et à RabbitMQ pour gérer les calculs asynchrones.
 
-3. **Redis** :
+3. Redis :
    - Utilisé comme base de données temporaire pour stocker les résultats des calculs.
 
-4. **RabbitMQ** :
+4. RabbitMQ :
    - Sert de broker de messages pour la communication entre les services.
 
-5. **Consumer** :
+5. Consumer :
    - Un worker Python qui consomme les messages RabbitMQ, effectue les calculs et enregistre les résultats dans Redis.
 
 ---
 
-## 🚀 **Fonctionnalités principales**
+## 🚀 Fonctionnalités principales
 
 - Soumission d'opérations mathématiques simples : addition, soustraction, multiplication, division.
 - Traitement asynchrone des calculs via RabbitMQ.
@@ -49,7 +46,7 @@ L'application est composée des composants suivants :
 
 ---
 
-## 🛠️ **Technologies utilisées**
+## 🛠️ Technologies utilisées
 
 - **Python** (Flask) : pour l'API backend et le worker consumer.
 - **Redis** : pour le stockage temporaire des résultats.
@@ -61,7 +58,7 @@ L'application est composée des composants suivants :
 
 ---
 
-## 🏗️ **Étapes réalisées**
+## 🏗️ Étapes réalisées
 
 ### 1️⃣ **Développement local**
 
@@ -181,7 +178,7 @@ calculatrice-cloud-native/
 
 ---
 
-## 🤝 Contributeur
+## 🤝 Contributrice
 
 - **KAPANDE DENG ANNA RAFAELLA** - Développeuse principale  😊
 
