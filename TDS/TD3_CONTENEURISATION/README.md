@@ -89,4 +89,4 @@ kubectl apply -f service.yml
 * docker run redis
 
 - Ensuite, exécuter les fichiers app.py et consumer.py:
-chose n'est pas clair dans les étapes ci-dessus !
+
