@@ -25,7 +25,7 @@ spec:
       priorityClassName: high-priority
       containers:
         - name: front-container
-          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/frontend_fr-2024:anna
+          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/frontend-2025:anna
           ports:
             - containerPort: 80
           resources:
@@ -51,10 +51,15 @@ spec:
     spec:
       containers:
         - name: front-container
-          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/frontend_fr-2024:anna
+          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/frontend-2025:anna
           ports:
             - containerPort: 80
           resources:
             requests:
-              cpu: 50m
-              memory: 56Mi 
+              cpu: 20m
+              memory: 32Mi 
+
+# cpu: 50m
+# memory: 56Mi 
+# europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/frontend_fr-2024:anna
+# europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/frontend-2025:anna

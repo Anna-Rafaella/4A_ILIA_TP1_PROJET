@@ -15,7 +15,10 @@ spec:
     spec:
       containers:
         - name: rabbitmq-container
-          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/rabbitmq-2024:anna
+          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/rabbitmq-2025:anna
           ports:
             - containerPort: 5672
             - containerPort: 15672
+
+#europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/rabbitmq-2024:anna
+# europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/rabbitmq-2025

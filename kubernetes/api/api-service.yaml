@@ -4,9 +4,8 @@ metadata:
   name: svc-api
   namespace: anna
 spec:
-  selector:
-    app: api
   ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8080
+  - port: 8080          # Port exposé par le service
+    targetPort: 5000    # Port utilisé par l'application Flask dans le Pod
+  selector:
+    app: api            # Doit correspondre aux labels du Pod

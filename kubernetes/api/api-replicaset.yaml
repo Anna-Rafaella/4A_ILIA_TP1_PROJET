@@ -15,16 +15,17 @@ spec:
     spec:
       containers:
         - name: api-container
-          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/backend_api-2024:anna
-          #europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/backend-2024:anna
+          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/backend_b-2025:anna
           ports:
             - containerPort: 8080
-          resources:
-            requests:
-              cpu: 30m
-              memory: 32Mi 
+          
           env:
             - name: REDIS_HOST
               value: svc-redis
             - name: RABBITMQ_HOST
               value: svc-rabbitmq
+
+#europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/backend_api-2024:anna
+#europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/backend-2024:anna
+
+

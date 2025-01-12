@@ -15,6 +15,8 @@ spec:
     spec:
       containers:
         - name: redis-container
-          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/redis-2024:anna
+          image: europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/redis-2025:anna
           ports:
             - containerPort: 6379
+
+#europe-west1-docker.pkg.dev/polytech-dijon/polytech-dijon/redis-2024:anna
