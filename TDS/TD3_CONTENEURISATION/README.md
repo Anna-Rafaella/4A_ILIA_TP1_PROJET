@@ -1,92 +1,143 @@
-## Etapes de la Construction et Exécution avec Docker
 
-3. Construire et Exécuter avec Docker Compose
-Une fois le fichier docker-compose.yml en place, vous pouvez construire et démarrer les services en utilisant Docker Compose.
+---
 
-Étape 1 : Construire les images Docker
-Allez dans le répertoire racine (/Conteneurisation) où se trouve votre docker-compose.yml et exécutez la commande suivante pour construire toutes les images Docker :
+# Étapes de Construction et d'Exécution avec Docker  
 
+Ce guide nous accompagne dans la mise en place, la construction, l'exécution et le test de nos services conteneurisés avec Docker et Docker Compose.  
 
-docker-compose build
-Étape 2 : Démarrer les services
-Une fois les images construites, vous pouvez démarrer tous les services en arrière-plan avec la commande suivante :
+---
 
-docker-compose up -d
-Cela démarrera vos services (backend, consumer, frontend, RabbitMQ, Redis) dans des conteneurs Docker.
+## 1. Construire et Exécuter avec Docker Compose  
 
-4. Tagging des Images Docker pour Kubernetes
-Quand vous passez à Kubernetes, vous devez pousser vos images Docker vers un registre Docker (par exemple, Docker Hub, Amazon ECR, Google Container Registry, etc.) pour qu'elles soient accessibles par votre cluster Kubernetes. Les images seront ensuite utilisées pour déployer vos pods.
+Docker Compose simplifie la gestion et l'orchestration de nos services conteneurisés.  
 
-Exemple de commandes pour taguer et pousser vos images vers un registre :
-Taguer l'image backend :
+### Étape 1 : Construire les images Docker  
 
-docker tag backend:latest <votre_utilisateur_dockerhub>/backend:latest
-Taguer l'image consumer :
+1. Accédons au répertoire racine où se trouve notre fichier `docker-compose.yml` :  
+   ```bash
+   cd /Conteneurisation
+   ```
 
-docker tag consumer:latest <votre_utilisateur_dockerhub>/consumer:latest
-Taguer l'image frontend :
+2. Construisons les images Docker pour tous nos services définis dans le fichier `docker-compose.yml` :  
+   ```bash
+   docker-compose build
+   ```  
 
-docker tag frontend:latest <votre_utilisateur_dockerhub>/frontend:latest
-Pousser les images vers Docker Hub :
+   Cette commande crée des images Docker locales à partir des instructions définies dans les `Dockerfile` de chaque service.  
 
-docker push <votre_utilisateur_dockerhub>/backend:latest
-docker push <votre_utilisateur_dockerhub>/consumer:latest
-docker push <votre_utilisateur_dockerhub>/frontend:latest
-5. Kubernetes : Déploiement des Services
-Une fois que vos images sont sur un registre Docker (Docker Hub, etc.), vous pouvez créer des fichiers de déploiement Kubernetes pour chaque service (backend, frontend, consumer).
+---
 
-Exemple de fichier de déploiement Kubernetes pour le backend (backend-deployment.yml):
+### Étape 2 : Démarrer les services  
 
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: backend
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: backend
-  template:
-    metadata:
-      labels:
-        app: backend
-    spec:
-      containers:
-      - name: backend
-        image: <votre_utilisateur_dockerhub>/backend:latest
-        ports:
-        - containerPort: 5000
-Exemple de service Kubernetes pour le backend (service.yml):
+1. Une fois les images construites, démarrons tous les services en arrière-plan :  
+   ```bash
+   docker-compose up -d
+   ```  
 
-apiVersion: v1
-kind: Service
-metadata:
-  name: backend-service
-spec:
-  selector:
-    app: backend
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 5000
-6. Déploiement dans Kubernetes
-Pour déployer vos services dans Kubernetes, vous devez d'abord vous connecter à votre cluster Kubernetes (par exemple, via kubectl) et appliquer les fichiers de déploiement et de service.
+2. Vérifions que les conteneurs fonctionnent correctement :  
+   ```bash
+   docker ps
+   ```  
 
-Appliquer le fichier de déploiement :
+   Cette commande liste tous les conteneurs en cours d'exécution. Nous devrions voir nos services (backend, consumer, frontend, RabbitMQ, Redis) dans la liste.  
 
-kubectl apply -f backend-deployment.yml
-kubectl apply -f consumer-deployment.yml
-kubectl apply -f frontend-deployment.yml
-Appliquer les services :
+---
 
-kubectl apply -f service.yml
+## 2. Taguer et Pousser les Images Docker dans un Registre  
 
-## Comment tester si mon Api marche bien:
+Pour partager nos images Docker ou les rendre accessibles à d'autres environnements (comme Kubernetes), nous devons les **taguer** et les **pousser** vers un registre Docker (par exemple, Docker Hub, Amazon ECR, ou Google Container Registry).  
 
-- Tout d'abord run ou exécuter les images des conteneurs de redis et rabbitmq dans le docker:
+### Étape 1 : Taguer les images  
 
-*  docker run rabbitmq -t 3.12-management
-* docker run redis
+1. Après avoir construit nos images, taguons-les avec un nom qui inclut notre identifiant de registre Docker. Voici des exemples pour Docker Hub :  
 
-- Ensuite, exécuter les fichiers app.py et consumer.py:
+   - **Taguer l'image backend** :  
+     ```bash
+     docker tag backend:latest <notre_utilisateur_dockerhub>/backend:latest
+     ```  
 
+   - **Taguer l'image consumer** :  
+     ```bash
+     docker tag consumer:latest <notre_utilisateur_dockerhub>/consumer:latest
+     ```  
+
+   - **Taguer l'image frontend** :  
+     ```bash
+     docker tag frontend:latest <notre_utilisateur_dockerhub>/frontend:latest
+     ```  
+
+### Étape 2 : Pousser les images dans le registre  
+
+1. Connectons-nous à notre compte Docker Hub (ou un autre registre) :  
+   ```bash
+   docker login
+   ```  
+
+2. Poussons chaque image taguée vers le registre :  
+
+   - **Pousser l'image backend** :  
+     ```bash
+     docker push <notre_utilisateur_dockerhub>/backend:latest
+     ```  
+
+   - **Pousser l'image consumer** :  
+     ```bash
+     docker push <notre_utilisateur_dockerhub>/consumer:latest
+     ```  
+
+   - **Pousser l'image frontend** :  
+     ```bash
+     docker push <notre_utilisateur_dockerhub>/frontend:latest
+     ```  
+
+---
+
+## 3. Tester si les Services Fonctionnent Correctement  
+
+### Étape 1 : Démarrer RabbitMQ et Redis Manuellement (si nécessaire)  
+
+Si nous ne souhaitons pas utiliser Docker Compose pour RabbitMQ et Redis, nous pouvons les démarrer séparément avec les commandes suivantes :  
+
+- **Démarrer RabbitMQ** (avec une interface de gestion) :  
+  ```bash
+  docker run -d --name rabbitmq -p 15672:15672 -p 5672:5672 rabbitmq:3.12-management
+  ```  
+  - Le port `15672` est utilisé pour l'interface de gestion.  
+  - Le port `5672` est utilisé pour la communication entre services.  
+
+- **Démarrer Redis** :  
+  ```bash
+  docker run -d --name redis -p 6379:6379 redis
+  ```  
+  - Le port `6379` est utilisé pour les communications avec Redis.  
+
+---
+
+### Étape 2 : Exécuter les Services Applicatifs  
+
+1. Une fois RabbitMQ et Redis en cours d'exécution, exécutons les fichiers Python de nos services pour tester leur fonctionnement :  
+
+   - **Backend** :  
+     ```bash
+     python app.py
+     ```  
+
+   - **Consumer** :  
+     ```bash
+     python consumer.py
+     ```  
+
+2. Vérifions les logs pour nous assurer que les services fonctionnent correctement et communiquent entre eux.  
+
+---
+
+## Résumé des Étapes  
+
+1. **Préparons nos fichiers** : Assurons-nous que chaque service dispose de son propre `Dockerfile` et que le fichier `docker-compose.yml` est configuré correctement.  
+2. **Construisons les images Docker** : Utilisons `docker-compose build` pour créer les images de tous les services.  
+3. **Démarrons les services** : Lançons tous les conteneurs en arrière-plan avec `docker-compose up -d`.  
+4. **Taguons et poussons nos images** : Préparons nos images pour un registre Docker et poussons-les avec `docker push`.  
+5. **Démarrons RabbitMQ et Redis manuellement** (si nécessaire).  
+6. **Testons les services** : Lançons les fichiers Python (`app.py`, `consumer.py`) et vérifions que tout fonctionne comme prévu.  
+
+---  
