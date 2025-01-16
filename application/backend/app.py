@@ -21,16 +21,6 @@ except redis.exceptions.ConnectionError:
     print("Erreur de connexion à Redis")
     redis_client = None
 
-# Connexion à RabbitMQ
-rabbitmq_host = os.getenv('RABBITMQ_HOST', 'svc-rabbitmq')  # Utiliser la variable d'environnement pour RabbitMQ
-try:
-    rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_host))
-    rabbitmq_channel = rabbitmq_connection.channel()
-    rabbitmq_channel.queue_declare(queue='calcul_queue')
-    print("Connexion à RabbitMQ réussie")
-except pika.exceptions.AMQPConnectionError:
-    print("Erreur de connexion à RabbitMQ")
-    rabbitmq_channel = None
 
 @app.route('/api/calcul', methods=['POST'])
 def effectuer_calcul():
@@ -50,14 +40,27 @@ def effectuer_calcul():
         "b": data["b"]
     }
 
-    # Placer la tâche dans RabbitMQ, si RabbitMQ est disponible
-    if rabbitmq_channel:
+    # Connexion à RabbitMQ (initialisée à chaque requête)
+    rabbitmq_host = os.getenv('RABBITMQ_HOST', 'svc-rabbitmq')
+    try:
+        rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_host))
+        rabbitmq_channel = rabbitmq_connection.channel()
+        rabbitmq_channel.queue_declare(queue='calcul_queue')
+
+        # Publier la tâche dans RabbitMQ
         rabbitmq_channel.basic_publish(
             exchange='', routing_key='calcul_queue', body=json.dumps(task)
         )
+
+        # Fermer la connexion RabbitMQ
+        rabbitmq_channel.close()
+        rabbitmq_connection.close()
+
         return jsonify({"id": calcul_id}), 202
-    else:
+
+    except pika.exceptions.AMQPConnectionError:
         return jsonify({"error": "Erreur de connexion à RabbitMQ"}), 500
+
 
 @app.route('/api/calcul/<calcul_id>', methods=['GET'])
 def recuperer_resultat(calcul_id):
@@ -69,6 +72,7 @@ def recuperer_resultat(calcul_id):
         if resultat:
             return jsonify({"id": calcul_id, "resultat": resultat.decode("utf-8")}), 200
     return jsonify({"error": "Résultat en attente ou ID invalide"}), 404
+
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
