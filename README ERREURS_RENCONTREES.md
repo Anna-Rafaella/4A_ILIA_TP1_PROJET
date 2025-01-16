@@ -92,17 +92,18 @@ Lors de l'accès à l'API via l'URL, une erreur `503 Service Temporarily Unavail
 **Solution :**  
 - Mise en place d'un service Kubernetes de type `ClusterIP` pour exposer le backend à d'autres pods dans le cluster :
   ```yaml
-  apiVersion: v1
-  kind: Service
-  metadata:
-    name: svc-backend
-  spec:
-    selector:
-      app: backend
-    ports:
-      - protocol: TCP
-        port: 5000
-        targetPort: 5000
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-api
+  namespace: anna
+spec:
+  ports:
+  - port: 8080          # Port exposé par le service
+    targetPort: 5000    # Port utilisé par l'application Flask dans le Pod
+  selector:
+    app: api            # Doit correspondre aux labels du Pod
+
   ```
 - Vérification des logs avec `kubectl logs` pour s'assurer que le backend fonctionnait correctement :
   ```bash
