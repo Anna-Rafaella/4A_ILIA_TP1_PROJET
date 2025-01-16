@@ -1,22 +1,33 @@
+Voici une version corrigée et améliorée de votre README pour qu'il soit cohérent, clair et bien structuré :
+
+---
 
 # **Cloud Native Calculator Application**
+
+---
+
+## **Introduction**
+Ce projet est une application Cloud Native de calculatrice distribuée, utilisant Flask pour le backend, Redis pour le stockage temporaire, RabbitMQ pour la gestion de la messagerie, et Kubernetes pour l'orchestration des conteneurs.  
+
+Ce document décrit les **erreurs rencontrées** lors du développement, leurs **causes identifiées**, ainsi que les **solutions apportées** pour résoudre ces problèmes. 
+
 ---
 
 ## **Erreurs rencontrées et solutions**
 
 ### **1. Problème de connexion à Redis**
 **Erreur :**  
-Lors de l'initialisation de l'application, une erreur de connexion à Redis a été rencontrée :  
+Lors de l'initialisation de l'application, la connexion à Redis échouait avec le message suivant :  
 ```plaintext
 Erreur de connexion à Redis
 ```
 
 **Cause identifiée :**  
 - Le service Redis n'était pas correctement configuré pour être accessible depuis le backend.
-- Le nom d'hôte utilisé pour Redis était incorrect.
+- Le nom d'hôte utilisé pour Redis dans le code était incorrect.
 
 **Solution :**  
-- Utilisation de la variable d'environnement `REDIS_HOST` pour configurer dynamiquement l'hôte Redis dans le backend :
+- Utilisation d'une variable d'environnement `REDIS_HOST` pour configurer dynamiquement l'hôte Redis dans le backend :
   ```python
   redis_host = os.getenv('REDIS_HOST', 'svc-redis')
   ```
@@ -29,50 +40,48 @@ Erreur de connexion à Redis
 
 ### **2. Problème de connexion à RabbitMQ**
 **Erreur :**  
-Une erreur similaire a été rencontrée lors de la tentative de connexion à RabbitMQ (Erreur 500) :  
+Une erreur 500 survenait lorsque le backend tentait de publier une tâche dans RabbitMQ :  
 ```plaintext
 Erreur de connexion à RabbitMQ
 ```
 
 **Cause identifiée :**  
-- La connexion RabbitMQ était initialisée au démarrage de l'application, ce qui posait problème lorsque RabbitMQ redémarrait ou devenait temporairement indisponible.
+- La connexion à RabbitMQ était initialisée au démarrage de l'application. Si RabbitMQ redémarrait ou devenait temporairement indisponible, la connexion devenait invalide.
 
 **Solution :**  
-- La connexion à RabbitMQ a été déplacée dans la fonction `effectuer_calcul` pour être créée et fermée dynamiquement à chaque requête :
+- La connexion à RabbitMQ a été déplacée dans la fonction `effectuer_calcul`, pour qu'elle soit créée et fermée dynamiquement à chaque requête :
   ```python
+  rabbitmq_host = os.getenv('RABBITMQ_HOST', 'svc-rabbitmq')
+  try:
+      rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_host))
+      rabbitmq_channel = rabbitmq_connection.channel()
+      rabbitmq_channel.queue_declare(queue='calcul_queue')
 
-rabbitmq_host = os.getenv('RABBITMQ_HOST', 'svc-rabbitmq')
-try:
-    rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_host))
-    rabbitmq_channel = rabbitmq_connection.channel()
-    rabbitmq_channel.queue_declare(queue='calcul_queue')
+      # Publier la tâche dans RabbitMQ
+      rabbitmq_channel.basic_publish(
+          exchange='', routing_key='calcul_queue', body=json.dumps(task)
+      )
 
-    # Publier la tâche dans RabbitMQ
-    rabbitmq_channel.basic_publish(
-        exchange='', routing_key='calcul_queue', body=json.dumps(task)
-    )
+      # Fermer la connexion RabbitMQ
+      rabbitmq_channel.close()
+      rabbitmq_connection.close()
 
-    # Fermer la connexion RabbitMQ
-    rabbitmq_channel.close()
-    rabbitmq_connection.close()
-
-    return jsonify({"id": calcul_id}), 202
-
-except pika.exceptions.AMQPConnectionError:
-    return jsonify({"error": "Erreur de connexion à RabbitMQ"}), 500
+      return jsonify({"id": calcul_id}), 202
+  except pika.exceptions.AMQPConnectionError:
+      return jsonify({"error": "Erreur de connexion à RabbitMQ"}), 500
   ```
 
 ---
 
 ### **3. Problème avec le frontend (page ne s'affichant pas)**
 **Erreur :**  
-Le frontend (interface utilisateur) ne s'affichait pas dans le navigateur.
+Le frontend ne s'affichait pas dans le navigateur.
 
 **Cause identifiée :**  
-- Mauvaise configuration du Dockerfile pour le frontend. Les fichiers du dossier `frontend` n'étaient pas copiés correctement dans le conteneur.
+- Le Dockerfile du frontend ne copiait pas correctement les fichiers nécessaires dans le conteneur.
 
 **Solution :**  
-- Mise à jour du Dockerfile pour copier correctement tous les fichiers frontend dans le répertoire HTML de Nginx :
+- Mise à jour du Dockerfile pour copier tous les fichiers frontend dans le répertoire HTML de Nginx :
   ```dockerfile
   FROM nginx:latest
   COPY . /usr/share/nginx/html
@@ -87,40 +96,39 @@ Le frontend (interface utilisateur) ne s'affichait pas dans le navigateur.
 Lors de l'accès à l'API via l'URL, une erreur `503 Service Temporarily Unavailable` était affichée.
 
 **Cause identifiée :**  
-- L'API backend n'était pas exposée correctement dans Kubernetes à travers le service.
+- L'API backend n'était pas exposée correctement via un service Kubernetes.
 
 **Solution :**  
-- Mise en place d'un service Kubernetes de type `ClusterIP` pour exposer le backend à d'autres pods dans le cluster :
+- Création d'un service Kubernetes de type `ClusterIP` pour exposer le backend à d'autres pods dans le cluster :
   ```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: svc-api
-  namespace: anna
-spec:
-  ports:
-  - port: 8080          # Port exposé par le service
-    targetPort: 5000    # Port utilisé par l'application Flask dans le Pod
-  selector:
-    app: api            # Doit correspondre aux labels du Pod
-
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: svc-api
+    namespace: anna
+  spec:
+    ports:
+    - port: 8080          # Port exposé par le service
+      targetPort: 5000    # Port utilisé par Flask dans le Pod
+    selector:
+      app: api            # Correspond aux labels du Pod
   ```
-- Vérification des logs avec `kubectl logs` pour s'assurer que le backend fonctionnait correctement :
+- Vérification des logs du backend pour diagnostiquer les problèmes :
   ```bash
-  kubectl logs <backend-pod-name> -n <namespace>
+  kubectl logs <backend-pod-name> -n anna
   ```
 
 ---
 
 ### **5. Perte de connexion à RabbitMQ lors du redémarrage des pods**
 **Erreur :**  
-Après un redémarrage des pods RabbitMQ, le backend perdait la connexion, rendant l'API non fonctionnelle.
+Après un redémarrage des pods RabbitMQ, le backend ne pouvait plus se connecter à RabbitMQ.
 
 **Cause identifiée :**  
-- La connexion globale à RabbitMQ était maintenue ouverte et devenait invalide après un redémarrage.
+- Une connexion globale à RabbitMQ était maintenue ouverte dans le backend, et devenait invalide après un redémarrage.
 
 **Solution :**  
-- Suppression de la connexion globale et gestion dynamique de la connexion dans chaque requête, comme mentionné dans la solution du problème 2.
+- Suppression de la connexion globale et gestion dynamique de la connexion dans chaque requête (voir solution au problème 2).
 
 ---
 
@@ -129,10 +137,10 @@ Après un redémarrage des pods RabbitMQ, le backend perdait la connexion, renda
 L'API renvoyait une erreur 400 lorsque les données envoyées n'étaient pas correctement formatées.
 
 **Cause identifiée :**  
-- Les données JSON envoyées ne contenaient pas les champs requis (`operation`, `a`, `b`).
+- Les données JSON envoyées ne contenaient pas les champs obligatoires (`operation`, `a`, `b`).
 
 **Solution :**  
-- Ajout d'une vérification pour valider la présence des champs nécessaires avant de traiter la requête :
+- Ajout d'une vérification pour s'assurer que tous les champs requis sont présents avant de traiter la requête :
   ```python
   if not all(k in data for k in ("operation", "a", "b")):
       return jsonify({"error": "Requête invalide"}), 400
@@ -142,10 +150,10 @@ L'API renvoyait une erreur 400 lorsque les données envoyées n'étaient pas cor
 
 ### **7. Problème de CORS (Cross-Origin Resource Sharing)**
 **Erreur :**  
-Le frontend ne pouvait pas appeler l'API backend à cause d'une erreur de CORS.
+Le frontend ne pouvait pas appeler l'API backend en raison d'une erreur de CORS.
 
 **Cause identifiée :**  
-- Le backend n'était pas configuré pour accepter les requêtes provenant du frontend.
+- Le backend n'était pas configuré pour accepter les requêtes provenant d'un domaine différent.
 
 **Solution :**  
 - Ajout de la bibliothèque Flask-CORS pour autoriser les requêtes entre domaines :
@@ -156,12 +164,12 @@ Le frontend ne pouvait pas appeler l'API backend à cause d'une erreur de CORS.
 
 ---
 
-
 ## **Commandes utiles**
+
 ### **Vérification des pods et services**
 ```bash
-kubectl get pods -n <namespace>
-kubectl get services -n <namespace>
+kubectl get pods -n anna
+kubectl get services -n anna
 ```
 
 ### **Vérification des logs**
@@ -169,4 +177,9 @@ kubectl get services -n <namespace>
 kubectl logs <pod-name> -n anna
 ```
 
+### **Tester l'API**
+#### Effectuer un calcul
+J'ai effectué le test de mon API sur PostMan
 
+---
+ 😊
