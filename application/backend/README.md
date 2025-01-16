@@ -1,1 +1,1 @@
-# Le Dockerfile pour le backend contient les instructions pour créer une image Docker contenant votre application Flask.
+# Le Dockerfile pour le backend contient les instructions pour créer une image Docker contenant mon application Flask.
